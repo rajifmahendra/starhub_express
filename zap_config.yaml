@@ -1,73 +1,47 @@
+---
 env:
-    contexts:
-    -
-        excludePaths: []
-        includePaths:
-        - http://34.142.219.174:5000.*
-        name: Default Context
-        technology:
-            exclude: []
-        urls:
-        - http://34.142.219.174:5000
-        authentication:
-            method: json
-            parameters:
-                loginPageUrl: http://34.142.219.174:5000
-                loginRequestBody: '{   "email": "%username%",   "password": "%password%" }'
-                loginRequestUrl: http://34.142.219.174:5000/api/auth/login
-            verification:
-                method: poll
-                loggedInRegex: '"token"\s*:\s*".+"'
-                loggedOutRegex: '"logout\x"'
-                pollFrequency: 60
-                pollUnits: requests
-                pollUrl: http://34.142.219.174:5000
-        sessionManagement:
-            method: cookie
-            parameters: {}
-        users:
-        -
-            credentials:
-                password: mypassword
-                username: naomi@gmail.com
-            name: authentication user
-    vars: {}
-    parameters:
-        failOnError: true
-        failOnWarning: false
-        progressToStdout: true
+  contexts:
+  - name: "Default Context"
+    urls:
+    - http://34.142.219.174:5000.*
+    excludePaths: []
+    authentication:
+      parameters: {}
+      verification:
+        method: "response"
+        pollFrequency: 60
+        pollUnits: "requests"
+    sessionManagement:
+      method: headers
+      parameters:
+        Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0MDM5MTY0MywiZXhwIjoxNzQwMzk1MjQzfQ.ov1JEkc7Uz5mv7_y_oK3FIOFvTFDfdykRe019C4dppE
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+  vars: {}
 jobs:
--
-    parameters:
-        scanOnlyInScope: true
-        enableTags: false
+- parameters:
+    scanOnlyInScope: true
+    enableTags: false
+  rules: []
+  name: "passiveScan-config"
+  type: "passiveScan-config"
+- parameters: {}
+  name: "openapi"
+  type: "openapi"
+- parameters: {}
+  name: "passiveScan-wait"
+  type: "passiveScan-wait"
+- parameters: {}
+  policyDefinition:
     rules: []
-    name: passiveScan-config
-    type: passiveScan-config
--
-    name: openapi
-    parameters:
-        apiFile: /src/swagger-output.json
-        context: Default Context
-    type: openapi
--
-    parameters: {}
-    name: passiveScan-wait
-    type: passiveScan-wait
--
-    parameters:
-        context: Default Context
-        threadPerHost: 4
-        user: authentication user
-    policyDefinition:
-        rules: []
-    name: activeScan
-    type: activeScan
--
-    parameters:
-        template: traditional-pdf
-        reportDir: ''
-        reportTitle: ZAP Scanning Report
-        reportDescription: ''
-    name: report-pdf
-    type: report
+  name: "activeScan"
+  type: "activeScan"
+- parameters:
+    template: "risk-confidence-html"
+    reportTitle: "ZAP Jira Cloud Scanning Report"
+    reportDescription: ""
+  name: "report"
+  type: "report"
+
