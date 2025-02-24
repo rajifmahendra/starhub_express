@@ -47,7 +47,7 @@ jobs:
 -
     name: openapi
     parameters:
-        apiFile: /demo/swagger_api.yaml
+        apiFile: /src/swagger-output.json
         context: Default Context
     type: openapi
 -
