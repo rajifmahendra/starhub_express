@@ -1,0 +1,73 @@
+env:
+    contexts:
+    -
+        excludePaths: []
+        includePaths:
+        - http://34.142.219.174:5000.*
+        name: Default Context
+        technology:
+            exclude: []
+        urls:
+        - http://34.142.219.174:5000
+        authentication:
+            method: json
+            parameters:
+                loginPageUrl: http://34.142.219.174:5000
+                loginRequestBody: '{   "email": "%username%",   "password": "%password%" }'
+                loginRequestUrl: http://34.142.219.174:5000/api/auth/login
+            verification:
+                method: poll
+                loggedInRegex: '"token"\s*:\s*".+"'
+                loggedOutRegex: '"logout\x"'
+                pollFrequency: 60
+                pollUnits: requests
+                pollUrl: http://34.142.219.174:5000
+        sessionManagement:
+            method: cookie
+            parameters: {}
+        users:
+        -
+            credentials:
+                password: mypassword
+                username: naomi@gmail.com
+            name: authentication user
+    vars: {}
+    parameters:
+        failOnError: true
+        failOnWarning: false
+        progressToStdout: true
+jobs:
+-
+    parameters:
+        scanOnlyInScope: true
+        enableTags: false
+    rules: []
+    name: passiveScan-config
+    type: passiveScan-config
+-
+    name: openapi
+    parameters:
+        apiFile: /demo/swagger_api.yaml
+        context: Default Context
+    type: openapi
+-
+    parameters: {}
+    name: passiveScan-wait
+    type: passiveScan-wait
+-
+    parameters:
+        context: Default Context
+        threadPerHost: 4
+        user: authentication user
+    policyDefinition:
+        rules: []
+    name: activeScan
+    type: activeScan
+-
+    parameters:
+        template: traditional-pdf
+        reportDir: ''
+        reportTitle: ZAP Scanning Report
+        reportDescription: ''
+    name: report-pdf
+    type: report
