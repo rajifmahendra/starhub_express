@@ -10,6 +10,11 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
+# Copy Prisma schema sebelum menjalankan generate
+COPY prisma/schema.prisma prisma/schema.prisma
+RUN npx prisma generate
+
+
 # Copy semua file ke dalam container
 COPY . .
 
