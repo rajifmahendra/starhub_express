@@ -3,16 +3,16 @@ env:
     -
         excludePaths: []
         includePaths:
-        - http://13.212.48.92:5000.*
+        - http://34.134.193.94:5000.*
         name: Default Context
         technology:
             exclude: []
         urls:
-        - http://13.212.48.92:5000
+        - http://34.134.193.94:5000
         authentication:
             method: json
             parameters:
-                loginPageUrl: http://13.212.48.92:5000
+                loginPageUrl: http://34.134.193.94:5000
                 loginRequestBody: '{   "email": "%username%",   "password": "%password%" }'
                 loginRequestUrl: http://34.142.219.174:5000/api/auth/login
             verification:

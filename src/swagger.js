@@ -5,7 +5,7 @@ const doc = {
     title: 'API Testing',
     description: 'Dokumentasi API dengan Swagger Autogen',
   },
-  host: '13.212.48.92:5000',
+  host: '34.134.193.94:5000',
   schemes: ['http'],
 };
 
