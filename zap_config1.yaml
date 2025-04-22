@@ -1,41 +1,43 @@
 env:
-    contexts:
-    -
-        excludePaths: []
-        includePaths:
+  contexts:
+    - name: Default Context
+      includePaths:
         - http://34.134.193.94:5000.*
-        name: Default Context
-        technology:
-            exclude: []
-        urls:
+      excludePaths: []
+      urls:
         - http://34.134.193.94:5000
-        authentication:
-            method: json
-            parameters:
-                loginPageUrl: http://34.134.193.94:5000
-                loginRequestBody: '{   "email": "%username%",   "password": "%password%" }'
-                loginRequestUrl: http://34.142.219.174:5000/api/auth/login
-            verification:
-                method: poll
-                loggedInRegex: '"token"\s*:\s*".+"'
-                loggedOutRegex: '"logout\x"'
-                pollFrequency: 60
-                pollUnits: requests
-                pollUrl: http://34.142.219.174:5000
-        sessionManagement:
-            method: cookie
-            parameters: {}
-        users:
-        -
-            credentials:
-                password: password
-                username: naomi@gmail.com
-            name: authentication user
-    vars: {}
-    parameters:
-        failOnError: true
-        failOnWarning: false
-        progressToStdout: true
+      technology:
+        exclude: []
+      authentication:
+        method: json
+        parameters:
+          loginPageUrl: http://34.134.193.94:5000
+          loginRequestUrl: http://34.142.219.174:5000/api/auth/login
+          loginRequestBody: '{ "email": "%username%", "password": "%password%" }'
+        verification:
+          method: poll
+          pollUrl: http://34.142.219.174:5000
+          pollFrequency: 60
+          pollUnits: requests
+          loggedInRegex: '"token"\s*:\s*".+?"'
+          loggedOutRegex: '"logout"'
+      sessionManagement:
+        method: httpHeader
+        parameters:
+            headerName: Authorization
+
+      users:
+        - name: authentication user
+          credentials:
+            username: naomi123@gmail.com
+            password: password
+
+vars: {}
+parameters:
+  failOnError: true
+  failOnWarning: false
+  progressToStdout: true
+
 jobs:
 -
     parameters:
@@ -47,7 +49,7 @@ jobs:
 -
     name: openapi
     parameters:
-        apiFile: /src/swagger-output.json
+        apiFile: http://13.212.48.92:4003/swagger
         context: Default Context
     type: openapi
 -

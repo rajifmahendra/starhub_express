@@ -1,0 +1,38 @@
+env:
+  contexts:
+  - name: API Scan Context
+    urls:
+    - http://13.212.48.92:4003
+    includePaths:
+    - http://13.212.48.92:4003/.*
+    authentication:
+      method: manual
+    sessionManagement:
+      method: cookie
+    users:
+    - name: dummy
+      credentials:
+        password: ""
+        username: ""
+
+jobs:
+# 1. Import OpenAPI
+- type: openapi
+  parameters:
+    context: API Scan Context
+    targetUrl: http://13.212.48.92:4003
+    definitionUrl: http://13.212.48.92:4003/swagger
+# 2. Passive Scan (jalan otomatis setelah import OpenAPI)
+- type: passiveScan-wait
+  parameters: {}
+
+# 3. Active Scan (Dengan JWT Token di header Authorization)
+- type: activeScan
+  parameters:
+    context: API Scan Context
+    user: dummy
+    scanHeaders:
+      - Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NTI5NDA3NiwiZXhwIjoxNzQ1Mjk3Njc2fQ.1MFX5ia5FTnAkUSuI9by_OpBr1Oz0IGImI1x-GNOzSg
+  policyDefinition:
+    defaultStrength: high
+    defaultThreshold: medium
