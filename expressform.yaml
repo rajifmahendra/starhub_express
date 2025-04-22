@@ -1,37 +1,66 @@
-jobs:
-  - name: passiveScan-config
-    type: passiveScan-config
-    parameters:
-      scanOnlyInScope: true
-      enableTags: false
-    rules: []
+env:
+  contexts:
+    - name: Default Context
+      includePaths:
+        - http://13.212.48.92:4003.*
+      urls:
+        - http://13.212.48.92:4003
+      authentication:
+        method: form
+        parameters:
+          loginPageUrl: http://13.212.48.92:4003/api/auth/login
+          loginRequestUrl: http://13.212.48.92:4003/api/auth/login
+          loginRequestBody: username={%username%}&password={%password%}
+        verification:
+          method: poll
+          pollUrl: http://13.212.48.92:4003/api/auth/login
+          loggedInRegex: Login
+          loggedOutRegex: Loggout
+          pollFrequency: 60
+          pollUnits: requests
+      sessionManagement:
+        method: cookie
+        parameters: {}
+      users:
+        - name: authentication user
+          credentials:
+            username: rajif@gmail.com
+            password: mypassword
 
-  # Aktifkan salah satu dari ini:
+  vars: {}
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
   - name: explore-request
     type: request
     parameters:
       requests:
-        - url: http://13.212.48.92:4003/api/users
-          method: GET
-          context: Default Context
-          user: authentication user
+        - url: http://13.212.48.92:4003/api/auth/login
+          method: POST
+          headers:
+            Content-Type: application/x-www-form-urlencoded
+          body: username=rajif@gmail.com&password=mypassword
 
-  # Optional, jika ada Swagger
-  # - name: openapi
-  #   type: openapi
-  #   parameters:
-  #     definitionUrl: http://13.212.48.92:4003/swagger
-  #     context: Default Context
+        - url: http://13.212.48.92:4003/api/auth/register
+          method: POST
+          headers:
+            Content-Type: application/json
+          body: '{"username": "newuser", "email": "newuser@gmail.com", "password": "test123"}'
 
-  - name: passiveScan-wait
-    type: passiveScan-wait
-    parameters: {}
+        - url: http://13.212.48.92:4003/api/order
+          method: POST
+          headers:
+            Content-Type: application/json
+          body: '{"productId": "12345", "quantity": 1}'
 
   - name: activeScan
     type: activeScan
     parameters:
       context: Default Context
-      threadPerHost: 4
       user: authentication user
+      threadPerHost: 4
     policyDefinition:
       rules: []
