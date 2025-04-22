@@ -1,62 +1,61 @@
 env:
   contexts:
-    -
-      includePaths:
-        - http://13.212.48.92:4003.*
-      name: Default Context
+    - name: Default Context
       urls:
         - http://13.212.48.92:4003
+      includePaths:
+        - http://13.212.48.92:4003.*
+      excludePaths: []
       authentication:
         method: form
         parameters:
           loginPageUrl: http://13.212.48.92:4003/api/auth/login
-          loginRequestBody: username={%username%}&password={%password%}
           loginRequestUrl: http://13.212.48.92:4003/api/auth/login
+          loginRequestBody: username={%username%}&password={%password%}
         verification:
           method: poll
-          loggedInRegex: dashboard|success|token
-          loggedOutRegex: login|unauthorized|logout
+          pollUrl: http://13.212.48.92:4003/api/auth/login
           pollFrequency: 60
           pollUnits: requests
-          pollUrl: http://13.212.48.92:4003/api/auth/login
+          loggedInRegex: Login
+          loggedOutRegex: Logout  # <== FIX typo sebelumnya
       sessionManagement:
         method: cookie
         parameters: {}
       users:
-        - credentials:
+        - name: authentication user
+          credentials:
             username: rajif@gmail.com
             password: mypassword
-          name: authentication user
+
   vars: {}
   parameters:
     failOnError: true
     failOnWarning: false
     progressToStdout: true
-    timeout: 300
 
 jobs:
   - name: passiveScan-config
+    type: passiveScan-config
     parameters:
       scanOnlyInScope: true
       enableTags: false
-    type: passiveScan-config
 
-  # optional, comment if /swagger invalid
-  # - name: openapi
-  #   parameters:
-  #     definitionUrl: http://13.212.48.92:4003/swagger
-  #     context: Default Context
-  #   type: openapi
-
-  - name: passiveScan-wait
-    parameters: {}
-    type: passiveScan-wait
-
-  - name: activeScan
+  - name: openapi
+    type: openapi
     parameters:
       context: Default Context
-      threadPerHost: 4
+      definitionUrl: http://13.212.48.92:4003/swagger  # <== Ganti dari `apiFile` ke `definitionUrl`
+
+  - name: passiveScan-wait
+    type: passiveScan-wait
+    parameters: {}
+
+  - name: activeScan
+    type: activeScan
+    parameters:
+      context: Default Context
       user: authentication user
+      threadPerHost: 4
     policyDefinition:
       rules: []
-    type: activeScan
