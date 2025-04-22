@@ -44,16 +44,21 @@ jobs:
     rules: []
     name: passiveScan-config
     type: passiveScan-config
+
 -
-    name: openapi
+    name: spider
+    type: spider
     parameters:
-        definitionUrl: http://13.212.48.92:4003/swagger
         context: Default Context
-    type: openapi
+        maxChildren: 10
+        recurse: true
+        subtreeOnly: true
+
 -
     parameters: {}
     name: passiveScan-wait
     type: passiveScan-wait
+
 -
     parameters:
         context: Default Context
