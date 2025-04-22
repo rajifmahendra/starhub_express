@@ -47,7 +47,7 @@ jobs:
 -
     name: openapi
     parameters:
-        apiFile: http://13.212.48.92:4003/swagger
+        apiFile: /demo/swagger_api.yaml
         context: Default Context
     type: openapi
 -
@@ -63,10 +63,3 @@ jobs:
         rules: []
     name: activeScan
     type: activeScan
-- type: activeScan
-  parameters:
-    context: Authentication Test
-    user: rajif@gmail.com
-  policyDefinition:
-    defaultStrength: insane
-    defaultThreshold: high
