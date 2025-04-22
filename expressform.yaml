@@ -1,14 +1,13 @@
 env:
   contexts:
-    -
-      excludePaths: []
+    - name: Default Context
       includePaths:
         - http://13.212.48.92:4003.*
-      name: Default Context
-      technology:
-        exclude: []
+      excludePaths: []
       urls:
         - http://13.212.48.92:4003
+      technology:
+        exclude: []
       authentication:
         method: form
         parameters:
@@ -26,49 +25,40 @@ env:
         method: cookie
         parameters: {}
       users:
-        -
+        - name: authentication user
           credentials:
-            password: mypassword
             username: rajif@gmail.com
-          name: authentication user
-
-  vars:
-    zapOptions:
-      - "-config"
-      - "pscanrulesBeta.enable=false"
-
+            password: mypassword
+  vars: {}
   parameters:
     failOnError: true
     failOnWarning: false
     progressToStdout: true
 
 jobs:
-  -
+  - name: passiveScan-config
+    type: passiveScan-config
     parameters:
       scanOnlyInScope: true
       enableTags: false
     rules: []
-    name: passiveScan-config
-    type: passiveScan-config
 
-  -
-    name: openapi
-    parameters:
-      definitionUrl: http://13.212.48.92:4003/swagger
-      context: Default Context
-    type: openapi
+  # openapi job DISABLED
+  # - name: openapi
+  #   type: openapi
+  #   parameters:
+  #     definitionUrl: http://13.212.48.92:4003/swagger
+  #     context: Default Context
 
-  -
-    parameters: {}
-    name: passiveScan-wait
+  - name: passiveScan-wait
     type: passiveScan-wait
+    parameters: {}
 
-  -
+  - name: activeScan
+    type: activeScan
     parameters:
       context: Default Context
       threadPerHost: 4
       user: authentication user
     policyDefinition:
       rules: []
-    name: activeScan
-    type: activeScan
