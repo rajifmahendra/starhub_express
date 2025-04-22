@@ -1,0 +1,46 @@
+env:
+  contexts:
+    - name: API Scan Context
+      urls:
+        - http://13.212.48.92:4003
+      includePaths:
+        - http://13.212.48.92:4003/.*
+      authentication:
+        method: jsonBased
+        parameters:
+          loginUrl: http://13.212.48.92:4003/api/auth/login
+          loginRequestBody: |
+            {
+              "email": "rajif@gmail.com",
+              "password": "mypassword"
+            }
+          loginRequestHeader: Content-Type: application/json
+          loginIndicator: "token"  # Atau sesuaikan dengan respon sukses (misal '200 OK' atau 'Set-Cookie')
+      sessionManagement:
+        method: cookie
+      users:
+        - name: loginUser
+          credentials:
+            "email": "rajif@gmail.com"
+            "password": "mypassword"
+
+jobs:
+  # 1. Import OpenAPI Spec
+  - type: openapi
+    parameters:
+      context: API Scan Context
+      targetUrl: http://13.212.48.92:4003
+      definitionUrl: http://13.212.48.92:4003/swagger
+
+  # 2. Passive Scan (otomatis setelah OpenAPI)
+  - type: passiveScan-wait
+    parameters: {}
+
+  # 3. Active Scan (dengan user login)
+  - type: activeScan
+    parameters:
+      context: API Scan Context
+      user: loginUser
+    policyDefinition:
+      defaultStrength: high
+      defaultThreshold: medium
