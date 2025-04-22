@@ -47,7 +47,7 @@ jobs:
 -
     name: openapi
     parameters:
-        definitionUrl: http://13.212.48.92:4003/swagger
+        definitionUrl: /demo/swagger_api.yaml
         context: Default Context
     type: openapi
 -
