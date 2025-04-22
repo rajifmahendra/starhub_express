@@ -9,10 +9,10 @@ const doc = {
   schemes: ['http'],
 };
 
-const outputFile = './src/swagger-output.json';
-const endpointsFiles = ['./src/server.js'];
+const outputFile = './swagger-output.json';
+const endpointsFiles = ['./server.js'];
 
 swaggerAutogen()(outputFile, endpointsFiles).then(() => {
   // Jalankan server setelah dokumentasi tergenerate
-  import('./server');
+  import('./server.js');
 });
