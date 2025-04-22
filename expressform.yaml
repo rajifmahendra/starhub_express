@@ -1,46 +1,130 @@
 env:
-  contexts:
-    - name: API Scan Context
-      urls:
+    contexts:
+    -
+        excludePaths: []
+        includePaths:
+        - http://13.212.48.92:4003.*
+        name: Default Context
+        technology:
+            exclude: []
+        urls:
         - http://13.212.48.92:4003
-      includePaths:
-        - http://13.212.48.92:4003/.*
-      authentication:
-        method: jsonBased
-        parameters:
-          loginUrl: http://13.212.48.92:4003/api/auth/login
-          loginRequestBody: |
-            {
-              "email": "rajif@gmail.com",
-              "password": "mypassword"
-            }
-          loginRequestHeader: Content-Type: application/json
-          loginIndicator: "token"  # Atau sesuaikan dengan respon sukses (misal '200 OK' atau 'Set-Cookie')
-      sessionManagement:
-        method: cookie
-      users:
-        - name: loginUser
-          credentials:
-            "email": "rajif@gmail.com"
-            "password": "mypassword"
-
+        authentication:
+            method: form
+            parameters:
+                loginPageUrl: http://13.212.48.92:4003/api/auth/login
+                loginRequestBody: username={%username%}&password={%password%}
+                loginRequestUrl: http://13.212.48.92:4003/api/auth/login
+            verification:
+                method: poll
+                loggedInRegex: Login
+                loggedOutRegex: Loggout
+                pollFrequency: 60
+                pollUnits: requests
+                pollUrl: http://13.212.48.92:4003/api/auth/login
+        sessionManagement:
+            method: cookie
+            parameters: {}
+        users:
+        -
+            credentials:
+                password: mypassword
+                username: rajif@gmail.com
+            name: authentication user
+    vars: {}
+    parameters:
+        failOnError: true
+        failOnWarning: false
+        progressToStdout: true
 jobs:
-  # 1. Import OpenAPI Spec
-  - type: openapi
+-
     parameters:
-      context: API Scan Context
-      targetUrl: http://13.212.48.92:4003
-      definitionUrl: http://13.212.48.92:4003/swagger
-
-  # 2. Passive Scan (otomatis setelah OpenAPI)
-  - type: passiveScan-wait
+        scanOnlyInScope: true
+        enableTags: false
+    rules: []
+    name: passiveScan-config
+    type: passiveScan-config
+-
+    name: openapi
+    parameters:
+        apiFile: /demo/swagger_api.yaml
+        context: Default Context
+    type: openapi
+-
     parameters: {}
-
-  # 3. Active Scan (dengan user login)
-  - type: activeScan
+    name: passiveScan-wait
+    type: passiveScan-wait
+-
     parameters:
-      context: API Scan Context
-      user: loginUser
+        context: Default Context
+        threadPerHost: 4
+        user: authentication user
     policyDefinition:
-      defaultStrength: high
-      defaultThreshold: medium
+        rules: []
+    name: activeScan
+    type: activeScan
+env:
+    contexts:
+    -
+        excludePaths: []
+        includePaths:
+        - http://13.212.48.92:4003.*
+        name: Default Context
+        technology:
+            exclude: []
+        urls:
+        - http://13.212.48.92:4003
+        authentication:
+            method: form
+            parameters:
+                loginPageUrl: http://13.212.48.92:4003/api/auth/login
+                loginRequestBody: username={%username%}&password={%password%}
+                loginRequestUrl: http://13.212.48.92:4003/api/auth/login
+            verification:
+                method: poll
+                loggedInRegex: Login
+                loggedOutRegex: Loggout
+                pollFrequency: 60
+                pollUnits: requests
+                pollUrl: http://13.212.48.92:4003/api/auth/login
+        sessionManagement:
+            method: cookie
+            parameters: {}
+        users:
+        -
+            credentials:
+                password: mypassword
+                username: rajif@gmail.com
+            name: authentication user
+    vars: {}
+    parameters:
+        failOnError: true
+        failOnWarning: false
+        progressToStdout: true
+jobs:
+-
+    parameters:
+        scanOnlyInScope: true
+        enableTags: false
+    rules: []
+    name: passiveScan-config
+    type: passiveScan-config
+-
+    name: openapi
+    parameters:
+        apiFile: /demo/swagger_api.yaml
+        context: Default Context
+    type: openapi
+-
+    parameters: {}
+    name: passiveScan-wait
+    type: passiveScan-wait
+-
+    parameters:
+        context: Default Context
+        threadPerHost: 4
+        user: authentication user
+    policyDefinition:
+        rules: []
+    name: activeScan
+    type: activeScan
