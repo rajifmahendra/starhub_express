@@ -1,65 +1,62 @@
 env:
-    contexts:
+  contexts:
     -
-        excludePaths: []
-        includePaths:
+      includePaths:
         - http://13.212.48.92:4003.*
-        name: Default Context
-        technology:
-            exclude: []
-        urls:
+      name: Default Context
+      urls:
         - http://13.212.48.92:4003
-        authentication:
-            method: form
-            parameters:
-                loginPageUrl: http://13.212.48.92:4003/api/auth/login
-                loginRequestBody: username={%username%}&password={%password%}
-                loginRequestUrl: http://13.212.48.92:4003/api/auth/login
-            verification:
-                method: poll
-                loggedInRegex: Login
-                loggedOutRegex: Loggout
-                pollFrequency: 60
-                pollUnits: requests
-                pollUrl: http://13.212.48.92:4003/api/auth/login
-        sessionManagement:
-            method: cookie
-            parameters: {}
-        users:
-        -
-            credentials:
-                password: mypassword
-                username: rajif@gmail.com
-            name: authentication user
-    vars: {}
-    parameters:
-        failOnError: true
-        failOnWarning: false
-        progressToStdout: true
+      authentication:
+        method: form
+        parameters:
+          loginPageUrl: http://13.212.48.92:4003/api/auth/login
+          loginRequestBody: username={%username%}&password={%password%}
+          loginRequestUrl: http://13.212.48.92:4003/api/auth/login
+        verification:
+          method: poll
+          loggedInRegex: dashboard|success|token
+          loggedOutRegex: login|unauthorized|logout
+          pollFrequency: 60
+          pollUnits: requests
+          pollUrl: http://13.212.48.92:4003/api/auth/login
+      sessionManagement:
+        method: cookie
+        parameters: {}
+      users:
+        - credentials:
+            username: rajif@gmail.com
+            password: mypassword
+          name: authentication user
+  vars: {}
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+    timeout: 300
+
 jobs:
--
+  - name: passiveScan-config
     parameters:
-        scanOnlyInScope: true
-        enableTags: false
-    rules: []
-    name: passiveScan-config
+      scanOnlyInScope: true
+      enableTags: false
     type: passiveScan-config
--
-    name: openapi
-    parameters:
-        definitionUrl: http://13.212.48.92:4003/swagger
-        context: Default Context
-    type: openapi
--
+
+  # optional, comment if /swagger invalid
+  # - name: openapi
+  #   parameters:
+  #     definitionUrl: http://13.212.48.92:4003/swagger
+  #     context: Default Context
+  #   type: openapi
+
+  - name: passiveScan-wait
     parameters: {}
-    name: passiveScan-wait
     type: passiveScan-wait
--
+
+  - name: activeScan
     parameters:
-        context: Default Context
-        threadPerHost: 4
-        user: authentication user
+      context: Default Context
+      threadPerHost: 4
+      user: authentication user
     policyDefinition:
-        rules: []
-    name: activeScan
+      rules: []
     type: activeScan
