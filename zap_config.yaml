@@ -1,47 +1,65 @@
----
 env:
-  contexts:
-  - name: "Default Context"
-    urls:
-    - http://34.142.219.174:5000.*
-    excludePaths: []
-    authentication:
-      parameters: {}
-      verification:
-        method: "response"
-        pollFrequency: 60
-        pollUnits: "requests"
-    sessionManagement:
-      method: headers
-      parameters:
-        Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0MDM5MTY0MywiZXhwIjoxNzQwMzk1MjQzfQ.ov1JEkc7Uz5mv7_y_oK3FIOFvTFDfdykRe019C4dppE
-  parameters:
-    failOnError: true
-    failOnWarning: false
-    progressToStdout: true
-  vars: {}
+    contexts:
+    -
+        excludePaths: []
+        includePaths:
+        - http://13.212.48.92:4003.*
+        name: Default Context
+        technology:
+            exclude: []
+        urls:
+        - http://13.212.48.92:4003
+        authentication:
+            method: form
+            parameters:
+                loginPageUrl: http://13.212.48.92:4003/api/auth/login
+                loginRequestBody: username={%username%}&password={%password%}
+                loginRequestUrl: http://13.212.48.92:4003/api/auth/login
+            verification:
+                method: poll
+                loggedInRegex: Login
+                loggedOutRegex: Loggout
+                pollFrequency: 60
+                pollUnits: requests
+                pollUrl: http://13.212.48.92:4003/api/auth/login
+        sessionManagement:
+            method: cookie
+            parameters: {}
+        users:
+        -
+            credentials:
+                password: mypassword
+                username: rajif@gmail.com
+            name: authentication user
+    vars: {}
+    parameters:
+        failOnError: true
+        failOnWarning: false
+        progressToStdout: true
 jobs:
-- parameters:
-    scanOnlyInScope: true
-    enableTags: false
-  rules: []
-  name: "passiveScan-config"
-  type: "passiveScan-config"
-- parameters: {}
-  name: "openapi"
-  type: "openapi"
-- parameters: {}
-  name: "passiveScan-wait"
-  type: "passiveScan-wait"
-- parameters: {}
-  policyDefinition:
+-
+    parameters:
+        scanOnlyInScope: true
+        enableTags: false
     rules: []
-  name: "activeScan"
-  type: "activeScan"
-- parameters:
-    template: "risk-confidence-html"
-    reportTitle: "ZAP Jira Cloud Scanning Report"
-    reportDescription: ""
-  name: "report"
-  type: "report"
-
+    name: passiveScan-config
+    type: passiveScan-config
+-
+    name: openapi
+    parameters:
+        definitionUrl: http://13.212.48.92:4003/swagger
+        context: Default Context
+    type: openapi
+-
+    parameters: {}
+    name: passiveScan-wait
+    type: passiveScan-wait
+-
+    parameters:
+        context: Default Context
+        threadPerHost: 4
+        user: authentication user
+    policyDefinition:
+        rules: []
+    name: activeScan
+    type: activeScan
