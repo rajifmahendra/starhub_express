@@ -1,70 +1,74 @@
 env:
-    contexts:
+  contexts:
     -
-        excludePaths: []
-        includePaths:
+      excludePaths: []
+      includePaths:
         - http://13.212.48.92:4003.*
-        name: Default Context
-        technology:
-            exclude: []
-        urls:
+      name: Default Context
+      technology:
+        exclude: []
+      urls:
         - http://13.212.48.92:4003
-        authentication:
-            method: form
-            parameters:
-                loginPageUrl: http://13.212.48.92:4003/api/auth/login
-                loginRequestBody: username={%username%}&password={%password%}
-                loginRequestUrl: http://13.212.48.92:4003/api/auth/login
-            verification:
-                method: poll
-                loggedInRegex: Login
-                loggedOutRegex: Loggout
-                pollFrequency: 60
-                pollUnits: requests
-                pollUrl: http://13.212.48.92:4003/api/auth/login
-        sessionManagement:
-            method: cookie
-            parameters: {}
-        users:
+      authentication:
+        method: form
+        parameters:
+          loginPageUrl: http://13.212.48.92:4003/api/auth/login
+          loginRequestBody: username={%username%}&password={%password%}
+          loginRequestUrl: http://13.212.48.92:4003/api/auth/login
+        verification:
+          method: poll
+          loggedInRegex: Login
+          loggedOutRegex: Loggout
+          pollFrequency: 60
+          pollUnits: requests
+          pollUrl: http://13.212.48.92:4003/api/auth/login
+      sessionManagement:
+        method: cookie
+        parameters: {}
+      users:
         -
-            credentials:
-                password: mypassword
-                username: rajif@gmail.com
-            name: authentication user
-    vars: {}
-    parameters:
-        failOnError: true
-        failOnWarning: false
-        progressToStdout: true
+          credentials:
+            password: mypassword
+            username: rajif@gmail.com
+          name: authentication user
+
+  vars:
+    zapOptions:
+      - "-config"
+      - "pscanrulesBeta.enable=false"
+
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
 jobs:
--
+  -
     parameters:
-        scanOnlyInScope: true
-        enableTags: false
+      scanOnlyInScope: true
+      enableTags: false
     rules: []
     name: passiveScan-config
     type: passiveScan-config
 
--
-    name: spider
-    type: spider
+  -
+    name: openapi
     parameters:
-        context: Default Context
-        maxChildren: 10
-        recurse: true
-        subtreeOnly: true
+      definitionUrl: http://13.212.48.92:4003/swagger
+      context: Default Context
+    type: openapi
 
--
+  -
     parameters: {}
     name: passiveScan-wait
     type: passiveScan-wait
 
--
+  -
     parameters:
-        context: Default Context
-        threadPerHost: 4
-        user: authentication user
+      context: Default Context
+      threadPerHost: 4
+      user: authentication user
     policyDefinition:
-        rules: []
+      rules: []
     name: activeScan
     type: activeScan
