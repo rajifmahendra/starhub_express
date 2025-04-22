@@ -63,3 +63,10 @@ jobs:
         rules: []
     name: activeScan
     type: activeScan
+- type: activeScan
+  parameters:
+    context: Authentication Test
+    user: rajif@gmail.com
+  policyDefinition:
+    defaultStrength: insane
+    defaultThreshold: high
