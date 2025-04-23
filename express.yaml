@@ -19,9 +19,11 @@ jobs:
 # 1. Import OpenAPI
 - type: openapi
   parameters:
-    context: API Scan Context
-    targetUrl: http://13.212.48.92:4003
-    definitionUrl: http://13.212.48.92:4003/swagger.json
+    apiUrl: http://13.212.48.92:4003/swagger.json  # URL ke Swagger/OpenAPI
+    context: API Scan Context                      # Sesuai nama context yang didefinisikan di atas
+    user: dummy                                     # Optional: user dummy (harus ada di contexts > users)
+    targetUrl: http://13.212.48.92:4003             # Base URL dari aplikasi/API
+
 # 2. Passive Scan (jalan otomatis setelah import OpenAPI)
 - type: passiveScan-wait
   parameters: {}
