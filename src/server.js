@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.get('/swagger', (req, res) => {
+app.get('/swagger.json', (req, res) => {
   const filePath = path.join(__dirname, 'swagger-output.json');
   res.sendFile(filePath);  // Kirimkan file .json
 });
