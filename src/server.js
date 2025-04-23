@@ -4,10 +4,13 @@ import authRoutes from "./routes/authRoutes.js"
 import orderRoutes from "./routes/orderRoutes.js"
 import path from "path";
 import { fileURLToPath } from 'url';
+import cors from 'cors';
+
 
 dotenv.config();
 
 const app = express();
+app.use(cors())
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
