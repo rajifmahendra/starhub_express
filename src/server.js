@@ -22,6 +22,11 @@ app.get('/swagger.json', (req, res) => {
   const filePath = path.join(__dirname, 'swagger-output.json');
   res.sendFile(filePath);  // Kirimkan file .json
 });
+
+app.get('/swagger.yaml', (req, res) => {
+  const filePath = path.join(__dirname, 'swagger-output.yaml');
+  res.sendFile(filePath);  // Kirimkan file .json
+});
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

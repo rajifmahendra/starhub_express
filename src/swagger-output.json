@@ -21,6 +21,16 @@
         }
       }
     },
+    "/swagger.yaml": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/auth/register": {
       "post": {
         "description": "",

@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  version: "1.0.0"
+  title: REST API
+  description: ""
+servers:
+  - url: 13.212.48.92:4003
+paths:
+  /swagger.json:
+    get:
+      description: ""
+      responses:
+        '200':
+          description: OK
+
+  /swagger.yaml:
+    get:
+      description: ""
+      responses:
+        '200':
+          description: OK
+
+  /api/auth/register:
+    post:
+      description: ""
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: any
+                password:
+                  type: string
+                  example: any
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+
+  /api/auth/login:
+    post:
+      description: ""
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: any
+                password:
+                  type: string
+                  example: any
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+
+  /api/order/:
+    post:
+      description: ""
+      parameters:
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: any
+                quantity:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+
+    get:
+      description: ""
+      parameters:
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
