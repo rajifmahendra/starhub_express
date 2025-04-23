@@ -21,7 +21,7 @@ jobs:
   parameters:
     context: API Scan Context
     targetUrl: http://13.212.48.92:4003
-    definitionUrl: http://13.212.48.92:4003/swagger.json
+    definitionUrl: http://13.212.48.92:4003/swagger.yaml
 # 2. Passive Scan (jalan otomatis setelah import OpenAPI)
 - type: passiveScan-wait
   parameters: {}
