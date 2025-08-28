@@ -2,18 +2,18 @@ env:
   contexts:
     - name: Default Context
       includePaths:
-        - http://13.212.48.92:4003.*
+        - http://54.179.2.8:4002.*
       urls:
-        - http://13.212.48.92:4003
+        - http://54.179.2.8:4002
       authentication:
         method: form
         parameters:
-          loginPageUrl: http://13.212.48.92:4003/api/auth/login
-          loginRequestUrl: http://13.212.48.92:4003/api/auth/login
+          loginPageUrl: http://54.179.2.8:4002/api/auth/login
+          loginRequestUrl: http://54.179.2.8:4002/api/auth/login
           loginRequestBody: username={%username%}&password={%password%}
         verification:
           method: poll
-          pollUrl: http://13.212.48.92:4003/api/auth/login
+          pollUrl: http://54.179.2.8:4002/api/auth/login
           loggedInRegex: Login
           loggedOutRegex: Loggout
           pollFrequency: 60
@@ -38,19 +38,19 @@ jobs:
     type: request
     parameters:
       requests:
-        - url: http://13.212.48.92:4003/api/auth/login
+        - url: http://54.179.2.8:4002/api/auth/login
           method: POST
           headers:
             Content-Type: application/x-www-form-urlencoded
           body: username=rajif@gmail.com&password=mypassword
 
-        - url: http://13.212.48.92:4003/api/auth/register
+        - url: http://54.179.2.8:4002/api/auth/register
           method: POST
           headers:
             Content-Type: application/json
           body: '{"username": "newuser", "email": "newuser@gmail.com", "password": "test123"}'
 
-        - url: http://13.212.48.92:4003/api/order
+        - url: http://54.179.2.8:4002/api/order
           method: POST
           headers:
             Content-Type: application/json

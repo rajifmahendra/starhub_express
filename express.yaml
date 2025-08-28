@@ -2,9 +2,9 @@ env:
   contexts:
   - name: API Scan Context
     urls:
-    - http://13.212.48.92:4003
+    - http://54.179.2.8:4002
     includePaths:
-    - http://13.212.48.92:4003/.*
+    - http://54.179.2.8:4002/.*
     authentication:
       method: manual
     sessionManagement:
@@ -20,7 +20,7 @@ jobs:
 - type: openapi
   parameters:
     context: API Scan Context
-    targetUrl: http://13.212.48.92:4003
+    targetUrl: http://54.179.2.8:4002
     apiFile: /config/swagger-outout.yaml  # Path file di dalam container
     user: dummy
 
