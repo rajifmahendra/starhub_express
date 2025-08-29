@@ -182,8 +182,8 @@ test_endpoints() {
 validate_config() {
     print_status "Validating ZAP configuration..."
     
-    if [ ! -f "zap_config.yaml" ]; then
-        print_error "zap_config.yaml not found."
+    if [ ! -f "expressform.yaml" ]; then
+        print_error "expressform.yaml not found."
         exit 1
     fi
     
@@ -193,7 +193,7 @@ validate_config() {
 import yaml
 import sys
 try:
-    with open('zap_config.yaml', 'r') as f:
+    with open('expressform.yaml', 'r') as f:
         yaml.safe_load(f)
     print('✅ ZAP configuration is valid YAML')
 except Exception as e:

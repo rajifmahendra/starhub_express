@@ -2,74 +2,16 @@ pipeline {
     agent any
 
     environment {
-        CONTAINER_NAME = 'starhub-express'
-        IMAGE_NAME = 'starhub-express'
-        IMAGE_TAG = 'latest'
         CHECKMARX_BASE_URL = 'https://anz.ast.checkmarx.net'
-        ENV_ID = '1d831157-6d03-448c-8886-63fb575da86f'
+        ENV_ID = 'ae3de5d2-b0d7-4394-9941-988a174df169'
         REPO_NAME = 'starhub_express'
-        DOCKER_NETWORK = 'dast-network'
     }
-    
+
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'Branch to build')
-        string(name: 'IMAGE_NAME', defaultValue: 'starhub-express', description: 'Docker image name')
-        choice(name: 'SCAN_TYPE', choices: ['full', 'quick', 'api-only'], description: 'Type of DAST scan to perform')
-        booleanParam(name: 'FAIL_ON_HIGH', defaultValue: true, description: 'Fail pipeline on high severity findings')
     }
 
     stages {
-        stage("Cleanup Previous Runs") {
-            steps {
-                sh """
-                    # Stop and remove existing containers
-                    docker stop $CONTAINER_NAME || true
-                    docker rm $CONTAINER_NAME || true
-                    
-                    # Remove existing network
-                    docker network rm $DOCKER_NETWORK || true
-                    
-                    # Clean up output directory
-                    rm -rf output || true
-                    mkdir -p output
-                """
-            }
-        }
-
-        stage("Setup Docker Network") {
-            steps {
-                sh """
-                    # Create isolated network for DAST testing
-                    docker network create $DOCKER_NETWORK || true
-                """
-            }
-        }
-
-        stage("Build and Run Application") {
-            steps {
-                sh """
-                    # Build the Docker image
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                    
-                    # Run container with network
-                    docker run -d \
-                        --name $CONTAINER_NAME \
-                        --network $DOCKER_NETWORK \
-                        -p 4002:5000 \
-                        ${IMAGE_NAME}:${IMAGE_TAG}
-                    
-                    # Wait for application to be ready
-                    echo "Waiting for application to start..."
-                    sleep 30
-                    
-                    # Health check - Check if app is running on the server IP
-                    echo "Checking application health on http://54.179.2.8:4002"
-                    timeout 60 bash -c 'until curl -f http://54.179.2.8:4002/api/auth/login > /dev/null 2>&1; do echo "Waiting for app..."; sleep 5; done'
-                    echo "Application is ready for testing"
-                """
-            }
-        }
-
         stage("Checkout Code") {
             steps {
                 script {
@@ -95,151 +37,37 @@ pipeline {
             }
         }
 
-        stage("Prepare DAST Configuration") {
-            steps {
-                sh """
-                    # Copy ZAP configuration
-                    cp ${env.REPO_NAME}/zap_config.yaml ./zap_config.yaml
-                    
-                    # Validate configuration
-                    if [ ! -f "./zap_config.yaml" ]; then
-                        echo "❌ ZAP configuration file not found!"
-                        exit 1
-                    fi
-                    
-                    # Display configuration for debugging
-                    echo "📋 ZAP Configuration:"
-                    head -20 ./zap_config.yaml
-                """
-            }
-        }
-
         stage("Run DAST Checkmarx") {
             steps {
-                script {
-                    def scanConfig = ''
-                    def failOnSeverity = params.FAIL_ON_HIGH ? '--fail-on high' : '--fail-on critical'
-                    
-                    // Configure scan type
-                    switch(params.SCAN_TYPE) {
-                        case 'quick':
-                            scanConfig = '--timeout=3000'
-                            break
-                        case 'api-only':
-                            scanConfig = '--timeout=5000 --api-scan-only'
-                            break
-                        default:
-                            scanConfig = '--timeout=10000'
-                    }
-                    
-                    withCredentials([string(credentialsId: 'cx-api-key', variable: 'API_KEY')]) {
-                        withEnv(["CX_APIKEY=${API_KEY}"]) {
-                            sh """
-                                echo "🚀 Starting DAST scan with Checkmarx..."
-                                echo "Scan Type: ${params.SCAN_TYPE}"
-                                echo "Configuration: ${scanConfig}"
-                                echo "Fail on severity: ${failOnSeverity}"
-                                
-                                docker run --user 0 \
-                                    --name checkmarx-dast-runner \
-                                    --network $DOCKER_NETWORK \
-                                    -v "\$(pwd)/output:/output" \
-                                    -v "\$(pwd)/zap_config.yaml:/config/zap_config.yaml" \
-                                    -e CX_APIKEY=\$CX_APIKEY \
-                                    checkmarx/dast:latest \
-                                    web --base-url=\$CHECKMARX_BASE_URL \
-                                    ${scanConfig} \
-                                    --log-level=debug \
-                                    --verbose \
-                                    --environment-id=\$ENV_ID \
-                                    ${failOnSeverity} \
-                                    --config="/config/zap_config.yaml" \
-                                    --output /output
-                            """
-                        }
-                    }
+                withCredentials([string(credentialsId: 'cx-apikey', variable: 'CX_APIKEY')]) {
+                    sh '''
+                      set -e
+                      mkdir -p output
+        
+                      test -f "starhub_express/expressform.yaml"
+        
+                      docker run --user 0 \
+                        -v "$(pwd)/output:/output" \
+                        -v "$(pwd)/starhub_express:/config" \
+                        -e CX_APIKEY=$CX_APIKEY \
+                        checkmarx/dast:latest \
+                          web --base-url=$CHECKMARX_BASE_URL \
+                          --timeout=10000 --log-level=debug --verbose \
+                          --environment-id=$ENV_ID --fail-on high \
+                          --config=/config/expressform.yaml \
+                          --output /output
+                    '''
                 }
-            }
-        }
-
-        stage("Process DAST Results") {
-            steps {
-                sh """
-                    echo "📊 Processing DAST results..."
-                    
-                    # List output files
-                    ls -la output/ || echo "No output directory found"
-                    
-                    # Check for report files
-                    if [ -f "output/dast-report.html" ]; then
-                        echo "✅ HTML report generated successfully"
-                        cp output/dast-report.html ./dast-report-\${BUILD_NUMBER}.html
-                    else
-                        echo "⚠️ HTML report not found"
-                    fi
-                    
-                    # Check for JSON results
-                    if [ -f "output/results.json" ]; then
-                        echo "✅ JSON results found"
-                        # Extract high/critical vulnerabilities count
-                        HIGH_VULNS=\$(cat output/results.json | grep -o '"risk":"High"' | wc -l || echo "0")
-                        CRITICAL_VULNS=\$(cat output/results.json | grep -o '"risk":"Critical"' | wc -l || echo "0")
-                        
-                        echo "🔍 Vulnerability Summary:"
-                        echo "Critical: \$CRITICAL_VULNS"
-                        echo "High: \$HIGH_VULNS"
-                        
-                        # Create summary file
-                        echo "DAST Scan Summary - Build #\${BUILD_NUMBER}" > dast-summary.txt
-                        echo "Critical Vulnerabilities: \$CRITICAL_VULNS" >> dast-summary.txt
-                        echo "High Vulnerabilities: \$HIGH_VULNS" >> dast-summary.txt
-                        echo "Scan Date: \$(date)" >> dast-summary.txt
-                    fi
-                """
             }
         }
     }
 
     post {
-        always {
-            sh """
-                # Clean up containers
-                docker stop checkmarx-dast-runner || true
-                docker rm checkmarx-dast-runner || true
-                docker stop $CONTAINER_NAME || true
-                docker rm $CONTAINER_NAME || true
-                docker network rm $DOCKER_NETWORK || true
-            """
-            
-            // Archive reports
-            archiveArtifacts artifacts: 'output/**/*', allowEmptyArchive: true
-            archiveArtifacts artifacts: 'dast-*.html', allowEmptyArchive: true
-            archiveArtifacts artifacts: 'dast-summary.txt', allowEmptyArchive: true
-        }
-        
         success {
-            echo "✅ DAST pipeline completed successfully."
-            script {
-                if (fileExists('dast-summary.txt')) {
-                    def summary = readFile('dast-summary.txt')
-                    echo "📋 DAST Summary:\\n${summary}"
-                }
-            }
+            echo "✅ DAST pipeline completed."
         }
-        
         failure {
-            echo "❌ DAST pipeline failed. Check container logs or configuration."
-            sh """
-                echo "🔍 Container logs for debugging:"
-                docker logs $CONTAINER_NAME || echo "No container logs available"
-                
-                echo "🔍 DAST runner logs:"
-                docker logs checkmarx-dast-runner || echo "No DAST runner logs available"
-            """
-        }
-        
-        unstable {
-            echo "⚠️ DAST pipeline completed with warnings or vulnerabilities found."
+            echo "❌ DAST pipeline failed. Check container logs or config."
         }
     }
 }
