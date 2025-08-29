@@ -4,7 +4,7 @@ info:
   title: REST API
   description: ""
 servers:
-  - url: 13.212.48.92:4003
+  - url: http://54.179.2.8:4002
 paths:
   /swagger.json:
     get:
