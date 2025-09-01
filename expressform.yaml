@@ -28,7 +28,7 @@ env:
           loggedInRegex: '"message"\s*:\s*"Berhasil mengambil data orders"'
           loggedOutRegex: '"message"\s*:\s*"Token tidak valid"'
       sessionManagement:
-        method: httpHeader
+        method: cookieBased
         parameters:
           headerName: Authorization
           headerPrefix: Bearer
