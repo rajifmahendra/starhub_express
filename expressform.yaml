@@ -17,16 +17,14 @@ authentication:
     method: poll
     parameters:
       pollUrl: http://54.179.2.8:4002/api/order
-      pollFrequency: 60
-      pollUnits: requests
-      loggedInRegex: '"message"\s*:\s*"Berhasil mengambil data orders"'
-      loggedOutRegex: '"message"\s*:\s*"Token tidak valid"'
+      pollFrequency: 10
+      pollUnits: seconds
+      loggedInRegex: '"message"\\s*:\\s*"Berhasil mengambil data orders"'
+      loggedOutRegex: '"message"\\s*:\\s*"Token tidak valid"'
 
 sessionManagement:
-  method: httpAuthenticationSessionManagement
-  parameters:
-    authHeaderName: Authorization
-    authHeaderValue: "Bearer %token%"
+  method: httpAuthentication
+  parameters: {}
 
 users:
   - name: authentication user
@@ -40,14 +38,12 @@ jobs:
     parameters:
       context: Default Context
       user: authentication user
-      maxDepth: 5
-      maxDuration: 10
+      maxDepth: 3
+      maxDuration: 2
       acceptCookies: true
       parseComments: true
       parseRobotsTxt: true
       parseSitemapXml: true
-      parseGit: true
-      parseSVNEntries: true
 
   - name: openapi
     type: openapi
@@ -61,10 +57,10 @@ jobs:
     parameters:
       context: Default Context
       user: authentication user
-      maxRuleDurationInMins: 5
-      maxScanDurationInMins: 30
-      threadPerHost: 4
-      delayInMs: 1000
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 10
+      threadPerHost: 2
+      delayInMs: 500
 
   - name: report
     type: report
