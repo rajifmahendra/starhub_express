@@ -71,21 +71,70 @@ const corsOptions = {
   preflightContinue: false
 };
 
-app.use(cors(corsOptions));
-
-// Handle preflight requests explicitly
-app.options('*', cors(corsOptions));
-
-app.use(express.json());
-
-// Add middleware untuk logging CORS issues
+// CORS middleware - harus di atas semua routes
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && process.env.NODE_ENV === 'production') {
-    console.log(`Request from origin: ${origin}`);
+  
+  // Log all requests for debugging
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - Origin: ${origin || 'none'}`);
+  
+  // Handle preflight requests first
+  if (req.method === 'OPTIONS') {
+    console.log('Handling preflight request for:', req.path);
+    
+    // Set CORS headers for preflight
+    if (origin) {
+      const allowedOrigins = process.env.ALLOWED_ORIGINS 
+        ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+        : [
+            'http://localhost:3000', 'http://localhost:3001', 'http://localhost:8080',
+            'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:8080',
+            'http://54.179.2.8:3000', 'http://54.179.2.8:3001', 'http://54.179.2.8:4001', 'http://54.179.2.8:8080'
+          ];
+      
+      if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers');
+        res.header('Access-Control-Max-Age', '86400'); // 24 hours
+        console.log('CORS preflight allowed for origin:', origin);
+      } else {
+        console.log('CORS preflight blocked for origin:', origin);
+        return res.status(403).json({ error: 'CORS policy violation' });
+      }
+    }
+    
+    return res.status(200).end();
   }
+  
+  // Handle actual requests
+  if (origin) {
+    const allowedOrigins = process.env.ALLOWED_ORIGINS 
+      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+      : [
+          'http://localhost:3000', 'http://localhost:3001', 'http://localhost:8080',
+          'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:8080',
+          'http://54.179.2.8:3000', 'http://54.179.2.8:3001', 'http://54.179.2.8:4001', 'http://54.179.2.8:8080'
+        ];
+    
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+      console.log('CORS request allowed for origin:', origin);
+    } else {
+      console.log('CORS request blocked for origin:', origin);
+      return res.status(403).json({ error: 'CORS policy violation' });
+    }
+  }
+  
   next();
 });
+
+// Apply CORS middleware as backup
+app.use(cors(corsOptions));
+
+app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 
