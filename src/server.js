@@ -29,6 +29,7 @@ const corsOptions = {
       // Add your frontend domain here
       'http://54.179.2.8:3000',
       'http://54.179.2.8:3001',
+      'http://54.179.2.8:4001', // Frontend port
       'http://54.179.2.8:8080',
       // Add production domains
       'https://yourdomain.com',
